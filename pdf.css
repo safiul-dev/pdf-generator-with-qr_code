@@ -1,9 +1,23 @@
-.color {
-  color: brown;
-  font-size: 34px;
+.page {
+  width: 100%;
 }
 
-.bold {
-    font-weight: bold;
-    color: aqua;
+.image-div {
+  float: left;
+  width: 40%;
+}
+
+.content-div {
+  float: right;
+  width: 60%;
+  padding-top: 20px;
+  font-size: 24px;
+  text-align: center;
+}
+
+.page {
+  page-break-after: always;
+}
+.page:last-child {
+  page-break-after: unset;
 }

@@ -5,11 +5,9 @@ require 'qrCodeGenerator.php';
 
 class GeneratePdf  {
 
-    public function process ($file_name="hi", $storage_path = 'pdfs', $qr_code_scanner_text ="http://localhost:5000/") 
+    public function process ($file_name="hi", $storage_path = 'pdfs', $content) 
     {
-        $qr_code = new QrCodeGenerator('qr_code_image/');
-        $data = file_get_contents($qr_code->generate($qr_code_scanner_text));
-        $base64 = 'data:image/' .'type'. ';base64,' . base64_encode($data);
+
         $dompdf = new Dompdf(['chroot' => __DIR__]);
 
         $html = "
@@ -18,25 +16,36 @@ class GeneratePdf  {
         <link type='text/css' href='pdf.css' rel='stylesheet' />
         </head>
         <body>
-        <table>
-          <tr >
-            <td class='color'>testing table</td>
-            </tr>
-          <tr>
-           <td class='bold'>Testng header</td>
-          </tr>
-          <tr><img src=". $base64 ."/></tr>
-        </table>
+        $content
         </body>
         </html>";
+        $customSize = [0.0, 0.0, 595.28, 244.8];
         $dompdf->setBasePath(__DIR__ . '/');
         $dompdf->loadHtml($html);
-        $dompdf->setPaper('A4', 'latter'); 
+        $dompdf->setPaper($customSize); 
         $dompdf->render(); 
         $output = $dompdf->output();
-        file_put_contents("$storage_path/$file_name.pdf", $output);
+        $link = "$storage_path/$file_name.pdf";
+        file_put_contents($link, $output);
+        return $link;
     }
 }
 
+
+$qr_code = new QrCodeGenerator();
 $pdf = new GeneratePdf();
-$pdf->process(time() .'_'. uniqid(), 'pdfs', 'http://localhost:5000/');
+$html = '';
+for($i = 0; $i < 20; $i++) {
+  $html .= "<div class='page'>
+  <div class='image-div'>
+    <img src=". $qr_code->generate("http://localhost:5000/$i") ."/>
+  </div>
+  <div class='content-div'>
+    <p> supabase auth-helpers · last week</p>
+    <p> Jhon nil</p>
+    <p> Expire Date 01/05/2023 - 12:00 pm </p>
+  </div>
+  </div>";
+}
+
+echo $pdf->process(time() .'_'. uniqid() . $i, 'pdfs', $html);
